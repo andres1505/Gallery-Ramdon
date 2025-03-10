@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personajes</title>
+    <!-- Se llama a bootstrap mediante CDN -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    {% load static %}
+    <!-- estilo de la pagina -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/conversacion.css' %}">
+</head>
+<body>
+    <header>
+        {% include "layouts/includes/header.html" %}
+    </header>
+    
+    
+    {% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    {% if personaje.imagen %}
+                    <img src="{{ personaje.imagen.url }}" class="card-img-top" alt="{{ personaje.nombre }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ personaje.nombre }}</h5>
+                        <p class="card-text">Conversación: {{ conversacion.titulo }}</p>
+                        <p class="card-text"><small class="text-muted">Creada el {{ conversacion.fecha_creacion|date:"d/m/Y H:i" }}</small></p>
+                        <a href="{% url 'chatbot:historial_conversaciones' %}" class="btn btn-secondary">Volver al historial</a>
+                        <a href="{% url 'chatbot:detalle_personaje' personaje.id %}" class="btn btn-primary">Continuar chat</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-8">
+                <div class="chat-container">
+                    <div class="chat-header">
+                        {% if personaje.imagen %}
+                        <img src="{{ personaje.imagen.url }}" alt="{{ personaje.nombre }}">
+                        {% endif %}
+                        <h5 class="mb-0">{{ personaje.nombre }}</h5>
+                    </div>
+                    
+                    <div class="chat-messages" id="chatMessages">
+                        {% for mensaje in mensajes %}
+                        <div class="message message-{{ mensaje.tipo }}">
+                            <div class="message-content">
+                                {{ mensaje.texto }}
+                                <div class="message-time">{{ mensaje.fecha|time:"H:i" }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/static/js/conversacion.js"></script>
+    {% endblock %}
+<footer>
+    {% include "layouts/includes/footer.html" %}
+</footer>
+</body>
+</html>

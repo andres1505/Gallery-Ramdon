@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personajes</title>
+    <!-- Se llama a bootstrap mediante CDN -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    {% load static %}
+    <!-- estilo de la pagina -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/detalle_personaje.css' %}">
+</head>
+
+<body>
+    <header>
+        {% include "layouts/includes/header.html" %}
+    </header>
+    {% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    {% if personaje.imagen %}
+                    <img src="{{ personaje.imagen.url }}" class="card-img-top" alt="{{ personaje.nombre }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ personaje.nombre }}</h5>
+                        <p class="card-text">{{ personaje.descripcion }}</p>
+                        <a href="{% url 'chatbot:lista_personajes' %}" class="btn btn-secondary">Volver a la lista</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="chat-container">
+                    <div class="chat-header">
+                        {% if personaje.imagen %}
+                        <img src="{{ personaje.imagen.url }}" alt="{{ personaje.nombre }}">
+                        {% endif %}
+                        <h5 class="mb-0">{{ personaje.nombre }}</h5>
+                    </div>
+
+                    <div class="chat-messages" id="chatMessages">
+                        {% for mensaje in mensajes %}
+                        <div class="message message-{{ mensaje.tipo }}">
+                            <div class="message-content">
+                                {{ mensaje.texto }}
+                                <div class="message-time">{{ mensaje.fecha|time:"H:i" }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="typing-indicator" id="typingIndicator">
+                        {{ personaje.nombre }} está escribiendo...
+                    </div>
+
+                    <div class="chat-input">
+                        <input type="text" id="messageInput" placeholder="Escribe un mensaje..." autofocus>
+                        <button id="sendButton">Enviar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageInput = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendButton');
+            const typingIndicator = document.getElementById('typingIndicator');
+
+            // Función para desplazar automáticamente hacia abajo
+            function scrollToBottom() {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // Desplazamiento inicial
+            scrollToBottom();
+
+            // Función para enviar mensajes
+            function sendMessage() {
+                const message = messageInput.value.trim();
+                if (!message) return;
+
+                // Desactivar el input y botón mientras se procesa
+                messageInput.disabled = true;
+                sendButton.disabled = true;
+
+                // Solicitud AJAX
+                fetch('{% url "chatbot:enviar_mensaje" personaje.id %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        mensaje: message,
+                        conversacion_id: '{{ conversacion.id }}'
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.exito) {
+                            // Limpiar el input
+                            messageInput.value = '';
+
+                            // Crear elementos para mensaje del usuario
+                            const userMessageDiv = document.createElement('div');
+                            userMessageDiv.className = 'message message-usuario';
+                            userMessageDiv.innerHTML = `
+                            <div class="message-content">
+                                ${data.mensaje_usuario.texto}
+                                <div class="message-time">${data.mensaje_usuario.fecha}</div>
+                            </div>
+                        `;
+                            chatMessages.appendChild(userMessageDiv);
+                            scrollToBottom();
+
+                            // Mostrar indicador de escritura
+                            typingIndicator.style.display = 'block';
+
+                            // Simular tiempo de respuesta (entre 1 y 3 segundos)
+                            setTimeout(() => {
+                                // Ocultar indicador de escritura
+                                typingIndicator.style.display = 'none';
+
+                                // Crear elementos para mensaje del personaje
+                                const characterMessageDiv = document.createElement('div');
+                                characterMessageDiv.className = 'message message-personaje';
+                                characterMessageDiv.innerHTML = `
+                                <div class="message-content">
+                                    ${data.mensaje_personaje.texto}
+                                    <div class="message-time">${data.mensaje_personaje.fecha}</div>
+                                </div>
+                            `;
+                                chatMessages.appendChild(characterMessageDiv);
+                                scrollToBottom();
+                            }, Math.random() * 2000 + 1000); // Entre 1 y 3 segundos
+                        } else {
+                            alert('Error: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Ha ocurrido un error. Por favor, intenta de nuevo.');
+                    })
+                    .finally(() => {
+                        // Reactivar el input y botón
+                        messageInput.disabled = false;
+                        sendButton.disabled = false;
+                        messageInput.focus();
+                    });
+            }
+
+            // Evento para el botón de enviar
+            sendButton.addEventListener('click', sendMessage);
+
+            // Evento para presionar Enter
+            messageInput.addEventListener('keypress', function (event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // Enfocar el input automáticamente
+            messageInput.focus();
+        });
+    </script>
+    {% endblock %}
+    <footer>
+        {% include "layouts/includes/footer.html" %}
+    </footer>
+</body>
+
+</html>

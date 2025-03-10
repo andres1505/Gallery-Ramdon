@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personajes</title>
+    <!-- Se llama a bootstrap mediante CDN -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    {% load static %}
+    <!-- estilo de la pagina -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/lista_articulos.css' %}">
+</head>
+
+<body>
+    <header>
+        {% include "layouts/includes/header.html" %}
+    </header>
+    {% block content %}
+    <div class="container">
+        <h1 class="mb-4">Historial de Conversaciones</h1>
+
+        {% if mensaje %}
+        <div class="alert alert-info">
+            {{ mensaje }}
+        </div>
+        {% endif %}
+
+        {% if conversaciones %}
+        <div class="list-group">
+            {% for conversacion in conversaciones %}
+            <a href="{% url 'chatbot:ver_conversacion' conversacion.id %}"
+                class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{{ conversacion.titulo }}</h5>
+                    <small>{{ conversacion.fecha_creacion|date:"d/m/Y H:i" }}</small>
+                </div>
+                <p class="mb-1">Personaje: {{ conversacion.personaje.nombre }}</p>
+                <small>{{ conversacion.mensajes.count }} mensajes</small>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-secondary">
+            No tienes conversaciones guardadas.
+        </div>
+        {% endif %}
+
+        <div class="mt-4">
+            <a href="{% url 'chatbot:lista_personajes' %}" class="btn btn-primary">Iniciar nueva conversación</a>
+        </div>
+    </div>
+    {% endblock %}
+    <footer>
+        {% include "layouts/includes/footer.html" %}
+    </footer>
+</body>
+
+</html>

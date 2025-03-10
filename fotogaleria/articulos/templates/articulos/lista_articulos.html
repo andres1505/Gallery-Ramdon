@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noticias</title>
+    <!-- Se llama a bootstrap mediante CDN -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    {% load static %}
+    <!-- estilo de la pagina -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/lista_articulos.css' %}">
+
+</head>
+<body>
+    <!-- se llama el header -->
+    <header>
+        {% include "layouts/includes/header.html" %}
+    </header>
+
+    {% block content %}
+    <div class="container mt-4">
+        <h1 class="text-center mb-4">Colección de Noticias</h1>
+        <p class="text-center mb-5 text-muted">Explora nuestras ultimas noticias</p>
+        
+        <div class="row">
+            {% for articulo in articulos %}
+            <div class="col-md-4">
+                <div class="thumbnail-card"><!-- clase de estilos -->
+                    {% if articulo.foto %}
+                    <img src="{{ articulo.foto.url }}" class="card-img-top" alt="{{ articulo.titulo }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ articulo.titulo }}</h5>
+                        <p class="card-description mb-2">{{ articulo.resumen|truncatewords:20 }}</p>
+                        <a href="{% url 'articulos:detalle_articulo' articulo.id %}" class="btn btn-primary">Ver</a>
+                        
+                        
+                        <small class="time-indicator">{{ articulo.fecha_publicacion|date:"d/m/Y H:i" }}</small>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center">
+                <p>No hay noticias disponibles en este momento.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>    
+    {% endblock %}
+    <footer>
+        {% include "layouts/includes/footer.html" %}
+    </footer>
+    
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+/* Estilos generales */
+.thumbnail-card {
+    margin-bottom: 2rem;
+    transition: transform 0.3s ease;
+    width: 90%;
+    height: 90%;
+}
+
+.thumbnail-card:hover {
+    transform: translateY(-5px);
+}
+.thumbnail-img {    
+    display: flex;
+    align-items: center;
+    justify-content: center;    
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+} 
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-buttons button {
+    padding: 0.25rem 1rem;
+    font-size: 0.875rem;
+}
+.time-indicator {
+    color: #6c757d;
+    font-size: 0.875rem;
+}
